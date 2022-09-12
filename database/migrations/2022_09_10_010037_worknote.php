@@ -27,7 +27,6 @@ return new class extends Migration
             $table->string('actual_cost');
             $table->string('actual_revenue');
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->enum('project_type', ['project', 'activity']);
             $table->enum('priority', ['HIGH', 'MEDIUM', 'LOW']);
             $table->dateTime('created_at');

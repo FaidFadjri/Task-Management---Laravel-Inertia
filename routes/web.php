@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\pages\DashboardController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -17,20 +18,17 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
-
 #--- Authentication Routes
 Route::get('login', [AuthController::class, 'login']);
 Route::post('login', [AuthController::class, '_storeLogin'])->name('login');
 
-
 #--- Dashboard Pages
-Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middleware('authenticated');
+
+
+
+#--- Project Pages
+Route::prefix('project')->group(function () {
+    Route::get('/', [ProjectController::class, 'index'])->name('project')->middleware('authenticated');
+    Route::get('/{showAll}', [ProjectController::class, 'index'])->name('projectShow')->middleware('authenticated');
+});

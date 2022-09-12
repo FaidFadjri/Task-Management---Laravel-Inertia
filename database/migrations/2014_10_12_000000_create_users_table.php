@@ -17,15 +17,13 @@ return new class extends Migration
             $table->id();
             $table->string('username');
             $table->string('email')->unique();
-            $table->string('password'); 
+            $table->string('password');
             $table->string('full_name');
             $table->enum('division', ['Operation Manager', 'General Repair', 'Body Paint', 'Finance', 'HCD', 'Business Development', 'KSC - Palima', 'Finance - HCD', 'Sparepart', 'Training']);
             $table->enum('gender', ['pria', 'wanita']);
             $table->enum('company', ['AKASTRA', 'KSC']);
             $table->string('image');
             $table->enum('role', ['admin', 'member']);
-            $table->timestamp('email_verified_at')->nullable();
-            $table->rememberToken();
             $table->timestamps();
         });
     }

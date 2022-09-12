@@ -34,7 +34,7 @@ const Login = () => {
                     "Session has been save",
                     "success"
                 ).then(() => {
-                    Inertia.visit(route("dashboard"), { preserveScroll: true });
+                    location.href = route('dashboard');
                 });
                 setIsLoading(false);
             })
