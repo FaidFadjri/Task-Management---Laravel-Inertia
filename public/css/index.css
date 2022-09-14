@@ -18,3 +18,8 @@
   ::-webkit-scrollbar-thumb:hover {
     background: #555; 
   }
+
+  .form-control {
+    border-radius: 5px;
+    border: 1px solid rgb(220, 220, 220);
+  }

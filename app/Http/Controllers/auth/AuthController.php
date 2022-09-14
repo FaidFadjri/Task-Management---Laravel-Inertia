@@ -93,6 +93,12 @@ class AuthController extends Controller
         }
     }
 
+    function _logout()
+    {
+        session()->flush();
+        return redirect()->to(route('login'));
+    }
+
     protected function _setSession($user)
     {
         session()->put('user', $user);

@@ -48,7 +48,15 @@
 
     <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js"></script>
 
+    <script src="/dist/js/vex.combined.min.js"></script>
+    <script>
+        vex.defaultOptions.className = 'vex-theme-os'
+    </script>
+    <link rel="stylesheet" href="/dist/css/vex.css" />
+    <link rel="stylesheet" href="/dist/css/vex-theme-os.css" />
     @yield('script')
 </body>
 

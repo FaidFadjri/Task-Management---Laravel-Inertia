@@ -12,14 +12,15 @@
                         <span class="hide-menu">Projects</span>
                     </a>
                 </li>
-
-                <li class="sidebar-item">
-                    <a class="sidebar-link waves-effect waves-dark sidebar-link" href="pages-profile.html"
-                        aria-expanded="false">
-                        <i class="mdi mdi-account-network"></i>
-                        <span class="hide-menu">User Management</span>
-                    </a>
-                </li>
+                @if (session()->get('user')['role'] == 'admin')
+                    <li class="sidebar-item">
+                        <a class="sidebar-link waves-effect waves-dark sidebar-link" href="pages-profile.html"
+                            aria-expanded="false">
+                            <i class="mdi mdi-account-network"></i>
+                            <span class="hide-menu">User Management</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </nav>
     </div>

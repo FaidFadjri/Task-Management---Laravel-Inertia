@@ -34,8 +34,10 @@
                                     </div>
                                     <div class="ms-auto">
                                         <span class="badge bg-light text-muted">
-                                            {{ round((intval($item['task_complete']) / intval($max_performance['task_complete'])) * 100, 2) }}
-                                            %
+                                            @if ($item['task_complete'])
+                                                {{ round((intval($item['task_complete']) / intval($max_performance['task_complete'])) * 100, 2) }}
+                                                %
+                                            @endif
                                         </span>
                                     </div>
                                 </div>
@@ -92,7 +94,9 @@
                                         </tbody>
                                     </table>
                                 @else
-                                    <p class="font-bold">belum ada data aktivitas</p>
+                                    <div class="container">
+                                        <p class="font-bold">belum ada data aktivitas</p>
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -144,7 +148,9 @@
                                     </div>
                                 @endforeach
                             @else
-                                <p class="font-bold">belum ada data projects yang tersedia </p>
+                                <div class="container">
+                                    <p class="font-bold">belum ada data projects yang tersedia </p>
+                                </div>
                             @endif
                         </div>
                     </div>
