@@ -74,8 +74,8 @@ class AuthController extends Controller
 
                 # insert activity table
                 $data = [
-                    'activity' => "Melakukan login",
-                    'user_id'  => $user['id']
+                    'activity' => "Melakukan login ",
+                    'id_user'  => $user['id']
                 ];
                 Activities::updateOrCreate($data);
 

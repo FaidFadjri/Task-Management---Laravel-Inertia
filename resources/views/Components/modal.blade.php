@@ -69,7 +69,7 @@
 {{-- Details Modal --}}
 <div class="modal fade" id="detailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
     aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="d-flex gap-2 align-items-center">
@@ -77,7 +77,7 @@
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('update') }}" method="POST">
+            <form action="{{ route('update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row">
@@ -85,21 +85,20 @@
                             <div class="d-flex align-items-center gap-2 mb-3">
                                 <img src="https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8dmlld3xlbnwwfHwwfHw%3D&w=1000&q=80"
                                     alt="logo" class="thumbnail rounded-circle"
-                                    style="height: 40px; width: 40px; object-fit:cover" id="image">
+                                    style="height: 40px; width: 40px; object-fit:cover" id="image-profile-thumbnail">
                                 <input type="text" class="form-control bg-transparent border-0 rounded font-bold"
                                     value="{{ session()->get('user')['full_name'] }}" id="full_name" readonly
                                     disabled>
-
+                            </div>
+                            <div class="mb-2">
+                                <input type="text" name="project[title]" id="title" class="form-control">
                             </div>
                             <textarea name="project[description]" id="description" class="form-control mb-3" cols="30" rows="10"
                                 placeholder="Ketik Deksripsi"></textarea>
 
-
                             <!-- Project id setup -->
                             <input type="hidden" id="project_id" name="project[id]">
-
                             <div class="mb-2">
-                                <label for="progress">Progress</label>
                                 <select id="progress" class="form-control" name="project[progress]">
                                     @foreach ($progress_list as $item)
                                         <option value="{{ $item }}">{{ $item }}
@@ -107,13 +106,32 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="mb-4">
-                                <label for="priority">Priority</label>
-                                <select id="priority" class="form-control" name="project[priority]">
-                                    <option value="HIGH">HIGH</option>
-                                    <option value="MEDIUM">MEDIUM</option>
-                                    <option value="LOW">LOW</option>
-                                </select>
+                            <div class="accordion" id="accordionExample">
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                                            aria-expanded="true" aria-controls="collapseTwo">
+                                            Files
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse"
+                                        aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body d-flex flex-column gap-2" id="files-areas">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-md-6 mb-2">
+                            <div id="comment-areas">
+                            </div>
+                            <div class="d-flex gap-3 mb-3">
+                                <input type="text" class="form-control" placeholder="Kirimkan komentar"
+                                    name="comment" id="comment">
+                                <button
+                                    class="btn btn-success text-white font-bold d-flex align-items-center justify-content-center"
+                                    type="button" id="send-comment">Send</button>
                             </div>
                             <div class="accordion mb-3" id="accordionExample">
                                 <div class="accordion-item">
@@ -121,12 +139,20 @@
                                         <button class="accordion-button collapsed" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#collapseOne"
                                             aria-expanded="true" aria-controls="collapseOne">
-                                            Cost Detail
+                                            More Info
                                         </button>
                                     </h2>
                                     <div id="collapseOne" class="accordion-collapse collapse"
                                         aria-labelledby="headingOne" data-bs-parent="#accordionExample">
                                         <div class="accordion-body">
+                                            <div class="mb-2">
+                                                <label for="priority">Priority</label>
+                                                <select id="priority" class="form-control" name="project[priority]">
+                                                    <option value="HIGH">HIGH</option>
+                                                    <option value="MEDIUM">MEDIUM</option>
+                                                    <option value="LOW">LOW</option>
+                                                </select>
+                                            </div>
                                             <div class="mb-2">
                                                 <label for="estimation_cost">Estimasi Biaya</label>
                                                 <input type="text" class="form-control" id="estimation_cost"
@@ -161,23 +187,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-sm-12 col-md-6 mb-2 overflow-auto">
-                            <div class="container-fluid mb-3 d-flex flex-column align-items-center justify-content-end p-2"
-                                style="background: #f4f4f4; min-height: 50vh;" id="comment-areas">
-                                {{-- <div class="mb-3 w-100 d-flex flex-row-reverse gap-2">
-                                    <div
-                                        class="bg-white w-100 border-0 d-flex flex-column py-2 align-items-center justify-content-center">
-                                        <p class="m-0">How are you sir ?</p>
-                                        <p class="m-0 fs-6">- faidfadjri</p>
-                                    </div>
-                                    <img src="https://cdn.searchenginejournal.com/wp-content/uploads/2022/06/image-search-1600-x-840-px-62c6dc4ff1eee-sej-1520x800.png"
-                                        style="height: 40px; width: 40px" class="rounded-circle">
-                                </div> --}}
-                            </div>
-                            <div class="d-flex gap-3">
-                                <input type="text" class="form-control" placeholder="Kirimkan komentar">
-                                <button class="btn btn-success text-white font-bold">Send</button>
+                            <div class="mb-3">
+                                <label for="formFile" class="form-label">Browse files</label>
+                                <input class="form-control" type="file" id="formFile" name="file">
                             </div>
                         </div>
                     </div>
@@ -197,69 +209,43 @@
 </div>
 
 
-<script>
-    $(document).on('click', '.detail-button', function(param) {
-        var id = $(this).attr('data-id');
-        axios.post("/detail", {
-            id: id
-        }).then(function(response) {
-            const field = ['image', 'full_name', 'description', 'progress', 'priority',
-                'estimation_cost', 'actual_cost', 'estimation_revenue', 'actual_revenue',
-                'estimation_cpus', 'actual_cpus', 'project_id'
-            ];
-            const data = response.data.detail;
-            const comment = response.data.comment;
-            const me = response.data.me;
 
-            field.forEach(element => {
-                $(`#${element}`).val(data[element]);
-            });
-
-
-
-
-
-            //----- create comment element
-            let html = '';
-            comment.forEach(element => {
-                html +=
-                    `<div class="mb-3 w-100 d-flex ${element.id_user == me.id ? "flex-row-reverse" : "flex-row"} gap-2">`;
-                html +=
-                    '        <div class="bg-white w-100 border-0 d-flex flex-column py-2 align-items-center justify-content-center">';
-                html += `       <p class="m-0">${element.comment}</p>`;
-                html += `       <p class="m-0 fs-6">- ${element.username}</p>`;
-                html += '   </div>';
-                html += `   <img src="/img/${element.image}";
-                                        style="height: 40px; width: 40px" class="rounded-circle">`;
-                html += ' </div>';
-            });
-
-            $("#comment-areas").html(html);
-
+<div class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Edit Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/project/save_user" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label for="username">Username</label>
+                        <input type="text" id="edit_username" class="form-control" name="user[username]">
+                    </div>
+                    <div class="mb-2">
+                        <label for="fullname">Full Name</label>
+                        <input type="text" id="edit_full_name" class="form-control" name="user[full_name]">
+                    </div>
+                    <div class="mb-2">
+                        <label for="email">Email</label>
+                        <input type="text" id="edit_email" class="form-control" name="user[email]">
+                    </div>
+                    <div class="mb-2">
+                        <label for="password">Password</label>
+                        <input type="password" id="edit_password" class="form-control" name="user[password]">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 
-
-            $("#detailModal").modal('show');
-            $(document).on('click', '.delete-button', function(param) {
-                Swal.fire({
-                    title: 'Yakin hapus data ini?',
-                    text: 'data akan dihapus permanen',
-                    showCancelButton: true,
-                    confirmButtonText: 'Delete',
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        Swal.fire('Data berhasil di hapus!', '', 'success')
-                    }
-                })
-            })
-
-
-        }).catch(function(error) {
-            console.log(error);
-        })
-    })
-
-    $(document).on('click', '.add-button', function(param) {
-        $("#addModal").modal('show');
-    })
-</script>
+<script src="/js/modal.js" type="text/javascript"></script>

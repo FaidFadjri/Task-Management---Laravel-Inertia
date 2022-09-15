@@ -2,19 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activities;
 use App\Models\Comments;
+use App\Models\Files;
 use App\Models\Projects;
 use App\Models\Users;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redis;
 
 class ProjectController extends Controller
 {
     protected $usersModel;
+    protected $token        = "asdasds15a454asdasdnasasbduasdguasdbasdas1das7dasd4asdasd4asd";
+    protected $API_URL      = "http://localhost:8080/";
+    protected $filesModel;
 
     public function __construct()
     {
         $this->usersModel = new Users();
+        $this->filesModel = new Files();
     }
 
     function index(Request $request)
@@ -142,6 +150,13 @@ class ProjectController extends Controller
                 $project['id_user'] = $user['id'];
                 $save = Projects::updateOrCreate($project);
                 if ($save) {
+
+                    #--- simpan aktivitas
+                    $activity = [
+                        'activity' => 'Menambahkan project baru "' . $project['title'] . '"',
+                        'id_user'  => $user['id']
+                    ];
+                    Activities::updateOrCreate($activity);
                     session()->flash('pesan', 'Project berhasil di simpan');
                     return redirect()->to(route('project'));
                 }
@@ -159,14 +174,18 @@ class ProjectController extends Controller
                 return response()->json("detail not found", 404);
             }
 
-
             #--- ambil comment
             $comment    = Comments::select('*')
                 ->join('tb_user', 'tb_comment.id_user', '=', 'tb_user.id')->where('id_project', $project_id)->get()->toArray();
+
+            $files      = $this->filesModel->_getFilesByProject($project_id);
+
             return response()->json(array(
                 'detail'    => $detail,
                 'comment'   => $comment,
-                'me'        => $this->_getSession()
+                'files'     => $files,
+                'me'        => $this->_getSession(),
+                'api_url'   => $this->API_URL
             ), 200);
         } else {
             return response()->json("id is undefined", 404);
@@ -179,8 +198,97 @@ class ProjectController extends Controller
             $project = $request->get('project');
             $update  = Projects::where('id', $project['id'])->update($project);
             if ($update) {
+
+                #---- check if files exist
+                if ($request->hasFile('file')) {
+                    $file     = $request->file('file');
+                    $response = Http::withToken($this->token)->attach('file', $file, $file->getClientOriginalName())->post($this->API_URL . "add_files", [
+                        'project_id' => $project['id']
+                    ]);
+                }
+
+                #---- simpan aktivitas
+                $activity = [
+                    'activity' => 'Update project "' . $project['title'] . '"',
+                    'id_user'  => $this->_getSession()['id']
+                ];
+
+                Activities::updateOrCreate($activity);
                 session()->flash('pesan', 'Project berhasil di update');
                 return redirect()->to(route('project'));
+            }
+        }
+    }
+
+    function _deleteProject($project_id)
+    {
+
+        #---- get project
+        $project = Projects::find($project_id);
+        if ($project->image) {
+            if (file_exists(public_path('assets/thumbnail/' . $project->image))) {
+                #--- delete thumbnail if exist
+                unlink(public_path('assets/thumbnail/' . $project->image));
+            }
+        }
+
+        #---- get files
+        $response = Http::withToken($this->token)->delete($this->API_URL . "delete_files/" . $project_id);
+        if ($response) {
+            $delete_project = Projects::where('id', '=', $project_id)->delete();
+
+            #---- simpan aktivitas
+            $activity = [
+                'activity' => 'Delete project "' . $project['title'] . '"',
+                'id_user'  => $this->_getSession()['id']
+            ];
+
+            Activities::updateOrCreate($activity);
+
+
+            if ($delete_project) {
+                return response()->json("data has been deleted", 200);
+            } else {
+                return response()->json("server error project not deleted", 500);
+            }
+        } else {
+            return response()->json("api error", 500);
+        }
+    }
+
+
+    function _getAccount()
+    {
+        return response()->json($this->_getSession(), 200);
+    }
+
+    function _saveUser(Request $request)
+    {
+        if ($request->has('user')) {
+            $user = $request->get('user');
+            dd($user);
+        }
+    }
+
+    function _addComment(Request $request)
+    {
+        if ($request->has('comment') && $request->has('id_project')) {
+            $comment = [
+                'comment'   => $request->get('comment'),
+                'id_user'   => $this->_getSession()['id'],
+                'id_project' => $request->get('id_project')
+            ];
+
+            $save = Comments::updateOrCreate($comment);
+            if ($save) {
+                return response()->json(array(
+                    'message' => "Data has been send!",
+                    'user'    => $this->_getSession()
+                ), 200);
+            } else {
+                return response()->json(array(
+                    'message' => "database error",
+                ), 500);
             }
         }
     }

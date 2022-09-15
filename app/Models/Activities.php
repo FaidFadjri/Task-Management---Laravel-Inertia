@@ -10,6 +10,7 @@ class Activities extends Model
     protected $table        = 'users_activity';
     protected $primaryKey   = 'id';
     protected $fillable     = ['activity', 'id_user', 'created_at', 'updated_at'];
+    public $timestamps      = true;
 
 
     function _getRecentActivities(int $limit = null, String $email = null)

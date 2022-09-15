@@ -88,7 +88,7 @@
                                                         </div>
                                                     </td>
                                                     <td>{{ $item['activity'] }}</td>
-                                                    <td>{{ $item['created_at'] }}</td>
+                                                    <td>{{ date('d F Y', strtotime($item['created_at'])) }}</td>
                                                 </tr>
                                             @endforeach
                                         </tbody>

@@ -28,7 +28,7 @@
                         <input type="date" id="end_date" class="form-control" name="end_date">
                     </div>
                     <div class="col-md-4 col-sm-6 mb-2">
-                        <select name="progress" class="form-control">
+                        <select name="progress" id="filter_progress" class="form-control">
                             <option value="">Filter Berdasarkan Progress</option>
                             @foreach ($progress_list as $item)
                                 <option value="{{ $item }}">{{ $item }}</option>
@@ -36,7 +36,7 @@
                         </select>
                     </div>
                     <div class="col-md-4 col-sm-6 mb-2">
-                        <select name="priority" class="form-control">
+                        <select name="priority" id="filter_priority" class="form-control">
                             <option value="">Filter Berdasarkan Prioritas</option>
                             <option value="HIGH">HIGH</option>
                             <option value="MEDIUM">MEDIUM</option>
@@ -112,16 +112,16 @@
                                 <div class="d-flex gap-2">
                                     @if ($item['progress'] == 'On Progress')
                                         <a href="#"
-                                            class="btn text-white font-bold btn-primary">{{ strtoupper($item['progress']) }}</a>
+                                            class="btn text-white font-bold btn-info">{{ $item['progress'] }}</a>
                                     @elseif($item['progress'] == 'To Do')
                                         <a href="#"
-                                            class="btn text-white font-bold btn-warning">{{ strtoupper($item['progress']) }}</a>
+                                            class="btn text-white font-bold btn-warning">{{ $item['progress'] }}</a>
                                     @elseif($item['progress'] == 'Pending' or $item['progress'] == 'Stuck')
                                         <a href="#"
-                                            class="btn text-white font-bold btn-danger">{{ strtoupper($item['progress']) }}</a>
+                                            class="btn text-white font-bold btn-danger">{{ $item['progress'] }}</a>
                                     @else
                                         <a href="#"
-                                            class="btn text-white font-bold btn-success">{{ strtoupper($item['progress']) }}</a>
+                                            class="btn text-white font-bold btn-success">{{ $item['progress'] }}</a>
                                     @endif
 
                                     @if ($item['priority'] == 'HIGH')
@@ -139,9 +139,8 @@
                             <div class="row g-0 justify-content-center align-items-center">
                                 @if ($item['image'])
                                     <div class="col-md-4">
-                                        <img src="/assets/thumbnail/{{ $item['image'] }}"
-                                            class="img-fluid my-3 mx-2 rounded-5" alt="card"
-                                            style="object-fit: cover">
+                                        <img src="/assets/thumbnail/{{ $item['image'] }}" class="img-fluid rounded-5"
+                                            alt="card" style="object-fit: cover; width: 100%">
                                     </div>
                                 @endif
                                 <div class="{{ $item['image'] ? 'col-md-8' : 'col-md-12' }}">
@@ -151,6 +150,9 @@
                                         <p class="card-text"><small class="text-muted">
                                                 Last updated at {{ date('d F Y', strtotime($item['updated_at'])) }}</small>
                                         </p>
+                                        <p class="font-bold font-secondary m-0 mb-2">Estimasi Biaya</p>
+                                        <input type="text" class="form-control mb-3" readonly
+                                            value="{{ $item['estimation_cost'] }}">
                                         <div class="d-flex align-items-center justify-content-end">
                                             <button
                                                 class="btn btn-info text-white detail-button font-bold d-flex align-items-center gap-2"
@@ -168,7 +170,7 @@
 
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
-                        @if ($projects)
+                        @if ($projects['data'])
                             @foreach ($projects['links'] as $item)
                                 @if ($item['url'])
                                     <li class="page-item">
@@ -196,9 +198,12 @@
             var params = @json($params);
             console.log(params);
             const field = ['company', 'division', 'end_date', 'start_date', 'progress', 'project_type', 'priority'];
-            field.forEach(param => {
+            const element = ['company', 'division', 'end_date', 'start_date', 'filter_progress', 'project_type',
+                'filter_priority'
+            ];
+            field.forEach((param, index) => {
                 if (params[param]) {
-                    $(`#${param}`).val(params[param]);
+                    $(`#${element[index]}`).val(params[param]);
                 }
             });
         });
@@ -212,7 +217,6 @@
                 if (file) {
                     let reader = new FileReader();
                     reader.onload = function(event) {
-                        console.log(event.target.result);
                         $('#imgPreview').attr('src', event.target.result);
                     }
                     reader.readAsDataURL(file);

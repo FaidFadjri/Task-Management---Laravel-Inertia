@@ -31,13 +31,16 @@ Route::get('/', [DashboardController::class, 'index'])->name('dashboard')->middl
 
 #--- Project Pages
 Route::prefix('project')->group(function () {
-    Route::get('/', [ProjectController::class, 'index'])->name('project');
-    Route::get('/{showAll}', [ProjectController::class, 'index'])->name('projectShow')->middleware('authenticated');
+    Route::get('/', [ProjectController::class, 'index'])->name('project')->middleware('authenticated');
 
     #--- Project request
+    Route::get('account', [ProjectController::class, '_getAccount']);
     Route::post('add', [ProjectController::class, '_addProject']);
     Route::post('update', [ProjectController::class, '_updateProject'])->name('update');
+    Route::delete('delete/{project_id}', [ProjectController::class, '_deleteProject'])->name('delete');
+    Route::post('comment', [ProjectController::class, '_addComment'])->name('comment');
+    Route::post('save_user', [ProjectController::class, '_saveUser']);
 });
 
-Route::post('detail', [ProjectController::class, '_detailProject']);
+Route::post('detail', [ProjectController::class, '_detailProject'])->middleware('authenticated');
 Route::get('search', [ProjectController::class, 'search'])->name('search')->middleware('authenticated');
