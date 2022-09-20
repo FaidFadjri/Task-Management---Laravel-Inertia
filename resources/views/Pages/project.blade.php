@@ -50,7 +50,7 @@
                             <option value="activity">Aktivitas</option>
                         </select>
                     </div>
-                    @if (session()->get('user')['role'] == 'admin')
+                    @if (session()->get('user')['status'] == 'admin')
                         <div class="col-md-6 col-sm-12 mb-2">
                             <select name="company" id="company" class="form-control">
                                 <option value="">Select Company</option>
@@ -110,19 +110,26 @@
                             <div class="card-header rounded-3 d-flex align-items-center justify-content-between">
                                 <p class="m-0 font-bold">{{ $item['division'] . ' at ' . $item['company'] }}</p>
                                 <div class="d-flex gap-2">
-                                    @if ($item['progress'] == 'On Progress')
-                                        <a href="#"
-                                            class="btn text-white font-bold btn-info">{{ $item['progress'] }}</a>
-                                    @elseif($item['progress'] == 'To Do')
-                                        <a href="#"
-                                            class="btn text-white font-bold btn-warning">{{ $item['progress'] }}</a>
-                                    @elseif($item['progress'] == 'Pending' or $item['progress'] == 'Stuck')
-                                        <a href="#"
-                                            class="btn text-white font-bold btn-danger">{{ $item['progress'] }}</a>
+                                    @if ($item['progress'] == 'WORKING ON IT')
+                                        @php
+                                            $classes = 'btn-info';
+                                        @endphp
+                                    @elseif($item['progress'] == 'TO DO')
+                                        @php
+                                            $classes = 'btn-warning';
+                                        @endphp
+                                    @elseif($item['progress'] == 'PENDING' or $item['progress'] == 'STUCK')
+                                        @php
+                                            $classes = 'btn-danger';
+                                        @endphp
                                     @else
-                                        <a href="#"
-                                            class="btn text-white font-bold btn-success">{{ $item['progress'] }}</a>
+                                        @php
+                                            $classes = 'btn-success';
+                                        @endphp
                                     @endif
+                                    <a href="#"
+                                        class="btn text-white font-bold {{ $classes }}">{{ $item['progress'] }}</a>
+
 
                                     @if ($item['priority'] == 'HIGH')
                                         <a href="#"
@@ -145,7 +152,7 @@
                                 @endif
                                 <div class="{{ $item['image'] ? 'col-md-8' : 'col-md-12' }}">
                                     <div class="card-body">
-                                        <h5 class="card-title font-bold">{{ $item['title'] }}</h5>
+                                        <h5 class="card-title font-bold">{{ $item['project'] }}</h5>
                                         <p class="card-text">{{ $item['description'] }}</p>
                                         <p class="card-text"><small class="text-muted">
                                                 Last updated at {{ date('d F Y', strtotime($item['updated_at'])) }}</small>

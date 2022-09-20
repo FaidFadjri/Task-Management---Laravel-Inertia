@@ -6,7 +6,7 @@
         }).then(function(response) {
             const field = ['image', 'full_name', 'description', 'progress', 'priority',
                 'estimation_cost', 'actual_cost', 'estimation_revenue', 'actual_revenue',
-                'estimation_cpus', 'actual_cpus', 'project_id', 'title'
+                'estimation_cpus', 'actual_cpus', 'project_id', 'project'
             ];
             const data = response.data.detail;
             const me = response.data.me;
@@ -78,12 +78,10 @@
             html +=
                 `<div class="mb-3 w-100 d-flex ${element.id_user == me.id ? "flex-row" : "flex-row-reverse"} gap-2">`;
             html +=
-                '        <div class="bg-white w-100 border-0 d-flex flex-column py-2 align-items-center justify-content-center">';
-            html += `       <p class="m-0">${element.comment}</p>`;
-            html += `       <p class="m-0 fs-6">- ${element.username}</p>`;
+                '        <div class="bg-white w-100 border-0 d-flex flex-column py-2 align-items-center justify-content-center ">';
+            html += `       <p class="m-0 w-100 text-wrap px-2" style="word-wrap: break-word;">${element.comment}</p>`;
+            html += `       <p class="m-0 fs-6 align-self-end mx-3 font-bold">- ${element.username}</p>`;
             html += '   </div>';
-            html += `   <img src="/img/${element.image}";
-                                    style="height: 40px; width: 40px" class="rounded-circle">`;
             html += ' </div>';
         });
 
@@ -93,7 +91,7 @@
     const set_files = (files, api_url, filesElement) => {
         let html = '';
         files.forEach(element => {
-            html += `<a class="btn btn-secondary" href="${api_url + "files/" + element.file_name}" download="${element.file_name}">${element.file_name}</a>`
+            html += `<a class="btn btn-secondary" href="${"https://project.akastra.id/files/" + element.file_name}" download="${element.file_name}">${element.file_name}</a>`
         });
         $(`#${filesElement}`).html(html);
     }
@@ -109,10 +107,8 @@
                 html +=
                     '<div class="bg-white w-100 border-0 d-flex flex-column py-2 align-items-center justify-content-center">';
                 html += `       <p class="m-0">${comment}</p>`;
-                html += `       <p class="m-0 fs-6">- ${response.data.user.username}</p>`;
+                html += `       <p class="m-0 fs-6 font-bold align-self-end px-2">- ${response.data.user.username}</p>`;
                 html += '   </div>';
-                html += `   <img src="/img/${response.data.user.image}";
-                                        style="height: 40px; width: 40px" class="rounded-circle">`;
                 html += ' </div>';
 
                 $("#comment-areas").append(html);
@@ -130,20 +126,4 @@
 
     }
 
-
-    $('#edit-profile-button').click(function (e) { 
-        e.preventDefault();
-        axios.get('/project/account').then(function (response) { 
-            const user = response.data;
-            setAccount(user)
-        })
-        $("#editModal").modal('show');
-    });
-
-
-    const setAccount = (user) => {
-        const field = ['username', 'full_name', 'email', 'password'];
-        field.forEach(element => {
-            $(`#edit_${element}`).val(user[element]);
-        });
-    }
+  

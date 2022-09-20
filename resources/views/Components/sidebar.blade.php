@@ -12,7 +12,7 @@
                         <span class="hide-menu">Projects</span>
                     </a>
                 </li>
-                @if (session()->get('user')['role'] == 'admin')
+                @if (session()->get('user')['status'] == 'admin')
                     <li class="sidebar-item">
                         <a class="sidebar-link waves-effect waves-dark sidebar-link" href="pages-profile.html"
                             aria-expanded="false">

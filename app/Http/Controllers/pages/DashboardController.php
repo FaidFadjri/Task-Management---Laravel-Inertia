@@ -7,36 +7,41 @@ use App\Http\Controllers\Controller;
 use App\Models\Activities;
 use App\Models\Projects;
 use App\Models\Users;
-use CodeIgniter\Entity\Cast\DatetimeCast;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
     protected $projectModel;
     protected $activityModel;
+    protected $userModel;
     public function __construct()
     {
         $this->projectModel  = new Projects();
         $this->activityModel = new Activities();
+        $this->userModel     = new Users();
     }
 
-    public function index()
+    public function index(Request $request)
     {
 
         $user = $this->_getSession();
-        if ($user['role'] == 'admin') {
+        if ($user['status'] == 'admin') {
             $recent_projects    = $this->projectModel->_getProjects(null, 3);
             $user_performance   = $this->projectModel->_getUserPerformance();
             $recent_activities  = $this->activityModel->_getRecentActivities(5);
             $last_interact      = $this->activityModel->_getLastInteract();
-            $perfomance_chart   = $this->projectModel->_getPerformanceChart();
+            $member             = $this->userModel->_getMember();
+            $components['member']  = $member; #--- send member data
 
             $max_performance = false;
             if ($user_performance) {
                 $max_performance   = max($user_performance);
             }
+
+
+            $query  = $request->query->all(); # get query from url
+            $perfomance_chart   = $this->projectModel->_getPerformanceChart(isset($query['user_id']) ? $query['user_id'] : null);
+            $components['user_id'] = isset($query['user_id']) ? $query['user_id'] : null;
         } else {
             $recent_projects    = $this->projectModel->_getProjects($user['email'], 3);
             $user_performance   = $this->projectModel->_getUserPerformance($user['email']);
@@ -58,6 +63,10 @@ class DashboardController extends Controller
         $components['max_performance']      = $max_performance;
         $components['last_interact']        = $last_interact;
         $components['performance_chart']    = $perfomance_chart;
+
+
+        // dd($this->projectModel->_getPerformanceChart($user['id']));
+        // dd($this->projectModel->distinct('progress')->groupBy('progress')->get()->toArray());
         return view('pages.dashboard', $components);
     }
 

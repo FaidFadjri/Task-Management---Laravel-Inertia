@@ -3,17 +3,43 @@
 @section('content')
     <div class="page-wrapper">
         <div class="container-fluid">
+            @if (Session::has('pesan'))
+                <div class="row">
+                    <div class="col-12">
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ Session::get('pesan') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    </div>
+                </div>
+            @endif
             <div class="row">
                 <div class="col-lg-8">
                     <div class="card">
                         <div class="card-body">
-                            <div class="d-md-flex align-items-center">
+                            <div class="d-md-flex justify-content-between">
                                 <div>
                                     <h4 class="card-title d-flex justify-content-between">
                                         Sales Summary
                                     </h4>
                                     <h6 class="card-subtitle">Ample admin Vs Pixel admin</h6>
                                 </div>
+                                <select
+                                    class="form-control {{ session()->get('user')['status'] == 'member' ? 'd-none' : '' }}"
+                                    style="width: fit-content; height: fit-content;" id="filter_member">
+                                    @if (session()->get('user')['status'] == 'admin')
+                                        @if ($user_id == null)
+                                            <option value="all" selected>Semua</option>
+                                        @else
+                                            <option value="all">Semua</option>
+                                        @endif
+                                        @foreach ($member as $user)
+                                            <option value="{{ $user->id }}"
+                                                {{ $user_id == $user->id ? 'selected' : '' }}>{{ $user->full_name }}
+                                            </option>
+                                        @endforeach
+                                    @endif
+                                </select>
                             </div>
                             <div id="chartdiv"></div>
                         </div>
@@ -122,7 +148,7 @@
                                         <div class="d-flex flex-column">
                                             <div class="comment-text w-100 d-flex flex-column">
                                                 <h6 class="font-medium font-bold">:: {{ $item['full_name'] }}</h6>
-                                                <span class="m-0 d-block font-bold">{{ $item['title'] }}</span>
+                                                <span class="m-0 d-block font-bold">{{ $item['project'] }}</span>
                                                 <span>{{ $item['description'] }}</span>
                                             </div>
                                             <div class="d-flex justify-content-start gap-2 mt-2 ms-2"
@@ -199,6 +225,10 @@
         }
     </style>
 
+@endsection
+
+
+
 @section('script')
     <script>
         am5.ready(function() {
@@ -231,6 +261,8 @@
                 textType: "circular",
                 centerX: 0,
                 centerY: 0,
+                maxWidth: 10,
+                fontSize: 0.000001
             });
 
             var sliceTemplate = series.slices.template;
@@ -239,8 +271,6 @@
                 templateField: "settings",
                 cornerRadius: 4,
             });
-
-            console.log(sliceTemplate)
 
 
             series.get("colors").set("colors", [
@@ -280,5 +310,15 @@
             series.appear(1000, 100);
         });
     </script>
-@endsection
+
+
+    <script>
+        $(document).ready(function() {
+            $('#filter_member').change(function(e) {
+                e.preventDefault();
+                var member = $(this).val();
+                member === 'all' ? (location.href = '/') : (location.href = `/?user_id=${member}`)
+            });
+        });
+    </script>
 @endsection

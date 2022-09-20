@@ -16,7 +16,7 @@ class ProjectController extends Controller
 {
     protected $usersModel;
     protected $token        = "asdasds15a454asdasdnasasbduasdguasdbasdas1das7dasd4asdasd4asd";
-    protected $API_URL      = "http://localhost:8080/";
+    protected $API_URL      = "https://project.akastra.id/";
     protected $filesModel;
 
     public function __construct()
@@ -30,13 +30,13 @@ class ProjectController extends Controller
         $query  = $request->query->all(); # get query from url
         $user   = $this->_getSession(); # get user data check if they member or admin
 
-        $progress_list = ['To Do', 'On Progress', 'Pending', 'Stuck', 'Complete'];
+        $progress_list = ['TO DO', 'WORKING ON IT', 'PENDING', 'STUCK', 'COMPLETE'];
         $list_division = $this->usersModel->_getDivision();
         $request_url   = str_replace("/project", "", str_replace("/project?", "&", $this->removeParam($request->getRequestUri(), "page")));
 
         # getting projects data
-        $projects               = Projects::select(DB::raw("progress, priority, title, description, estimation_cost, created_at, tb_project.id as project_id, tb_user.division, tb_user.company, tb_project.image, tb_project.updated_at"))->join('tb_user', 'tb_project.id_user', '=', 'tb_user.id');
-        if ($user['role'] == 'member') {
+        $projects               = Projects::select(DB::raw("progress, priority, project, description, estimation_cost, created_at, tb_project.id as project_id, tb_user.division, tb_user.company, tb_project.image, tb_project.updated_at"))->join('tb_user', 'tb_project.id_user', '=', 'tb_user.id')->orderBy('tb_project.updated_at', 'DESC');
+        if ($user['status'] == 'member') {
             $projects           = $projects->where('id_user', $user['id']);
         }
 
@@ -98,7 +98,7 @@ class ProjectController extends Controller
         if (isset($query['search'])) {
             $search = $query['search'];
             if ($search) {
-                $projects = $projects->where('title', 'like', "%$search%");
+                $projects = $projects->where('project', 'like', "%$search%");
             }
         }
 
@@ -153,7 +153,7 @@ class ProjectController extends Controller
 
                     #--- simpan aktivitas
                     $activity = [
-                        'activity' => 'Menambahkan project baru "' . $project['title'] . '"',
+                        'activity' => 'Menambahkan project baru "' . $project['project'] . '"',
                         'id_user'  => $user['id']
                     ];
                     Activities::updateOrCreate($activity);
@@ -197,19 +197,26 @@ class ProjectController extends Controller
         if ($request->has('project')) {
             $project = $request->get('project');
             $update  = Projects::where('id', $project['id'])->update($project);
-            if ($update) {
 
-                #---- check if files exist
-                if ($request->hasFile('file')) {
-                    $file     = $request->file('file');
-                    $response = Http::withToken($this->token)->attach('file', $file, $file->getClientOriginalName())->post($this->API_URL . "add_files", [
-                        'project_id' => $project['id']
-                    ]);
+            #---- check if files exist
+            if ($request->hasFile('file')) {
+                $file     = $request->file('file');
+                $response = Http::withToken($this->token)->attach('file', $file, $file->getClientOriginalName())->post($this->API_URL . "add_files", [
+                    'project_id' => $project['id']
+                ]);
+                if ($response->status() == 200) {
+                    session()->flash('pesan', 'Files berhasil di upload');
+                } else {
+                    session()->flash('pesan', 'Gagal upload files');
                 }
+            }
+
+
+            if ($update) {
 
                 #---- simpan aktivitas
                 $activity = [
-                    'activity' => 'Update project "' . $project['title'] . '"',
+                    'activity' => 'Update project "' . $project['project'] . '"',
                     'id_user'  => $this->_getSession()['id']
                 ];
 
@@ -239,7 +246,7 @@ class ProjectController extends Controller
 
             #---- simpan aktivitas
             $activity = [
-                'activity' => 'Delete project "' . $project['title'] . '"',
+                'activity' => 'Delete project "' . $project['project'] . '"',
                 'id_user'  => $this->_getSession()['id']
             ];
 
@@ -259,14 +266,18 @@ class ProjectController extends Controller
 
     function _getAccount()
     {
-        return response()->json($this->_getSession(), 200);
+        $id   = $this->_getSession()['id'];
+        $user = Users::find($id);
+        return response()->json($user, 200);
     }
 
     function _saveUser(Request $request)
     {
         if ($request->has('user')) {
             $user = $request->get('user');
-            dd($user);
+            Users::where('email', '=', $user['email'])->update($user);
+            session()->flash('pesan', 'data berhasil di update');
+            return redirect()->to('/');
         }
     }
 

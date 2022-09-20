@@ -15,7 +15,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="add_title">Nama project atau aktivitas</label>
-                        <input type="text" class="form-control" id="add_title" name="project[title]"
+                        <input type="text" class="form-control" id="add_title" name="project[project]"
                             placeholder="Ketik judul project atau aktivitas" required>
                     </div>
                     <div class="mb-3">
@@ -91,7 +91,7 @@
                                     disabled>
                             </div>
                             <div class="mb-2">
-                                <input type="text" name="project[title]" id="title" class="form-control">
+                                <input type="text" name="project[project]" id="project" class="form-control">
                             </div>
                             <textarea name="project[description]" id="description" class="form-control mb-3" cols="30" rows="10"
                                 placeholder="Ketik Deksripsi"></textarea>
@@ -209,43 +209,6 @@
 </div>
 
 
-
-<div class="modal fade" id="editModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel">Edit Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="/project/save_user" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-2">
-                        <label for="username">Username</label>
-                        <input type="text" id="edit_username" class="form-control" name="user[username]">
-                    </div>
-                    <div class="mb-2">
-                        <label for="fullname">Full Name</label>
-                        <input type="text" id="edit_full_name" class="form-control" name="user[full_name]">
-                    </div>
-                    <div class="mb-2">
-                        <label for="email">Email</label>
-                        <input type="text" id="edit_email" class="form-control" name="user[email]">
-                    </div>
-                    <div class="mb-2">
-                        <label for="password">Password</label>
-                        <input type="password" id="edit_password" class="form-control" name="user[password]">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 
 <script src="/js/modal.js" type="text/javascript"></script>
