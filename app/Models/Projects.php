@@ -42,12 +42,18 @@ class Projects extends Model
         return $builder->groupBy('tb_project.id_user')->get()->toArray();
     }
 
-    function _getPerformanceChart($id_user = null)
+    function _getPerformanceChart($id_user = null, $company = null)
     {
-        $builder = Projects::select(DB::raw("COUNT(CASE WHEN progress = 'WORKING ON IT' THEN progress END) as progress , COUNT(CASE WHEN progress = 'TO DO' THEN progress END) as todo, COUNT(CASE WHEN progress = 'STUCK' THEN progress END) as stuck, COUNT(CASE WHEN progress = 'PENDING' THEN progress END) as pending, COUNT(CASE WHEN progress = 'COMPLETE' THEN progress END) as complete"));
+        $builder = Projects::select(DB::raw("COUNT(CASE WHEN progress = 'WORKING ON IT' THEN progress END) as progress , COUNT(CASE WHEN progress = 'TO DO' THEN progress END) as todo, COUNT(CASE WHEN progress = 'STUCK' THEN progress END) as stuck, COUNT(CASE WHEN progress = 'PENDING' THEN progress END) as pending, COUNT(CASE WHEN progress = 'COMPLETE' THEN progress END) as complete"))->join('tb_user', 'tb_project.id_user', '=', 'tb_user.id');
         if ($id_user) {
-            $builder->where('id_user', $id_user);
+            $builder->where('id_user', '=', $id_user);
         }
+
+        if ($company) {
+            $builder->where('company', '=', $company);
+        }
+
+
         return $builder->first()->toArray();
     }
 }

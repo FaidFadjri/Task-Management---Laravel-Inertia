@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\File;
 
 class ProjectController extends Controller
 {
@@ -68,14 +70,14 @@ class ProjectController extends Controller
         if (isset($query['start_date'])) {
             $start_date = $query['start_date'];
             if ($start_date) {
-                $projects = $projects->whereDate('created_at', '>=', $start_date);
+                $projects = $projects->whereDate('due_date', '>=', $start_date);
             }
         }
 
         if (isset($query['end_date'])) {
             $end_date = $query['end_date'];
             if ($end_date) {
-                $projects = $projects->whereDate('created_at', '<=', $end_date);
+                $projects = $projects->whereDate('due_date', '<=', $end_date);
             }
         }
 
@@ -102,6 +104,7 @@ class ProjectController extends Controller
             }
         }
 
+        $projects->orderBy('due_date', 'desc');
         $projects = $projects->paginate(4)->toArray();
         if (!$projects['data']) {
             session()->flash('error', '404');
@@ -141,7 +144,7 @@ class ProjectController extends Controller
                 $mimeType  = $thumbnail->getMimeType();
                 if ($mimeType == 'image/jpeg' || $mimeType == 'image/jpg' || $mimeType == 'image/png') { #--- create random name
                     $filename = round(microtime(true) * 1000) . '-' . str_replace(' ', '-', $thumbnail->getClientOriginalName());
-                    $thumbnail->move(public_path('assets/thumbnail/'), $filename);
+                    $thumbnail->move('assets/thumbnail/', $filename);
                     $project['image'] = $filename;
                 }
             }
@@ -184,8 +187,7 @@ class ProjectController extends Controller
                 'detail'    => $detail,
                 'comment'   => $comment,
                 'files'     => $files,
-                'me'        => $this->_getSession(),
-                'api_url'   => $this->API_URL
+                'me'        => $this->_getSession()
             ), 200);
         } else {
             return response()->json("id is undefined", 404);
@@ -201,19 +203,29 @@ class ProjectController extends Controller
             #---- check if files exist
             if ($request->hasFile('file')) {
                 $file     = $request->file('file');
-                $response = Http::withToken($this->token)->attach('file', $file, $file->getClientOriginalName())->post($this->API_URL . "add_files", [
-                    'project_id' => $project['id']
-                ]);
-                if ($response->status() == 200) {
-                    session()->flash('pesan', 'Files berhasil di upload');
+                $filename = $file->getClientOriginalName();
+                $fileSize = $file->getSize();
+
+                if ($fileSize > 3000000) {
+                    session()->flash('pesan', 'Oops! Maaf file anda terlalu besar ( Max 3 MB )');
+                    return redirect()->to(route('project'));
+                }
+
+                $file->move('files', $filename);
+                $fileData = [
+                    'file_name'  => $filename,
+                    'id_project' => $project['id']
+                ];
+                $saveFiles = Files::updateOrCreate($fileData);
+                if ($saveFiles) {
+                    session()->flash('pesan', 'Yeay! Files berhasil di upload');
                 } else {
-                    session()->flash('pesan', 'Gagal upload files');
+                    session()->flash('pesan', 'Oops! Gagal upload files');
                 }
             }
 
 
             if ($update) {
-
                 #---- simpan aktivitas
                 $activity = [
                     'activity' => 'Update project "' . $project['project'] . '"',
@@ -222,8 +234,8 @@ class ProjectController extends Controller
 
                 Activities::updateOrCreate($activity);
                 session()->flash('pesan', 'Project berhasil di update');
-                return redirect()->to(route('project'));
             }
+            return redirect()->to(route('project'));
         }
     }
 
@@ -233,33 +245,36 @@ class ProjectController extends Controller
         #---- get project
         $project = Projects::find($project_id);
         if ($project->image) {
-            if (file_exists(public_path('assets/thumbnail/' . $project->image))) {
-                #--- delete thumbnail if exist
-                unlink(public_path('assets/thumbnail/' . $project->image));
+            if (file_exists('assets/thumbnail/' . $project->image)) {
+                unlink('assets/thumbnail/' . $project->image); # delete thumbnail if exist
             }
         }
 
-        #---- get files
-        $response = Http::withToken($this->token)->delete($this->API_URL . "delete_files/" . $project_id);
-        if ($response) {
-            $delete_project = Projects::where('id', '=', $project_id)->delete();
 
-            #---- simpan aktivitas
-            $activity = [
-                'activity' => 'Delete project "' . $project['project'] . '"',
-                'id_user'  => $this->_getSession()['id']
-            ];
-
-            Activities::updateOrCreate($activity);
-
-
-            if ($delete_project) {
-                return response()->json("data has been deleted", 200);
-            } else {
-                return response()->json("server error project not deleted", 500);
+        $listOfFiles = $this->filesModel->_getFilesByProject($project_id);
+        if ($listOfFiles) {
+            foreach ($listOfFiles as $file) {
+                if (file_exists('files/' . $file['file_name'])) {
+                    unlink('files/' . $file['file_name']);
+                }
             }
+        }
+
+        $delete_files = Files::where('id_project', '=', $project_id)->delete();
+        $delete_project = Projects::where('id', '=', $project_id)->delete();
+
+        #---- simpan aktivitas
+        $activity = [
+            'activity' => 'Delete project "' . $project['project'] . '"',
+            'id_user'  => $this->_getSession()['id']
+        ];
+
+        Activities::updateOrCreate($activity);
+
+        if ($delete_project) {
+            return response()->json("data has been deleted", 200);
         } else {
-            return response()->json("api error", 500);
+            return response()->json("server error project not deleted", 500);
         }
     }
 
@@ -274,8 +289,9 @@ class ProjectController extends Controller
     function _saveUser(Request $request)
     {
         if ($request->has('user')) {
-            $user = $request->get('user');
-            Users::where('email', '=', $user['email'])->update($user);
+            $user   = $request->get('user');
+            $userId = $this->_getSession()['id'];
+            Users::where('id', '=', $userId)->update($user);
             session()->flash('pesan', 'data berhasil di update');
             return redirect()->to('/');
         }

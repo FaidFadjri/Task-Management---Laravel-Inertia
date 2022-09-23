@@ -40,14 +40,16 @@ class DashboardController extends Controller
 
 
             $query  = $request->query->all(); # get query from url
-            $perfomance_chart   = $this->projectModel->_getPerformanceChart(isset($query['user_id']) ? $query['user_id'] : null);
+            $perfomance_chart   = $this->projectModel->_getPerformanceChart((isset($query['user_id']) ? $query['user_id'] : null), (isset($query['company']) ? $query['company'] : null));
             $components['user_id'] = isset($query['user_id']) ? $query['user_id'] : null;
+            $components['company'] = isset($query['company']) ? $query['company'] : null;
         } else {
             $recent_projects    = $this->projectModel->_getProjects($user['email'], 3);
             $user_performance   = $this->projectModel->_getUserPerformance($user['email']);
             $recent_activities  = $this->activityModel->_getRecentActivities(5, $user['email']);
             $last_interact      = $this->activityModel->_getLastInteract($user['email']);
             $perfomance_chart   = $this->projectModel->_getPerformanceChart($user['id']);
+            $components['company'] = null;
 
             $max_performance = false;
             if ($user_performance) {

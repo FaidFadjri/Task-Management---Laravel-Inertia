@@ -42,6 +42,15 @@
                         </select>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="add_project_type">Project Type</label>
+                        <select name="project[project_type]" id="add_project_type" class="form-control" required>
+                            <option value="">Pilih Project Type</option>
+                            <option value="PROJECT">PROJECT</option>
+                            <option value="ACTIVITY">ACTIVITY</option>
+                        </select>
+                    </div>
+
                     <label for="">Upload Thumbnail -- Optional</label>
                     <div
                         class="d-flex w-100 align-items-center justify-content-center flex-sm-column flex-md-row gap-2">
@@ -151,6 +160,18 @@
                                                     <option value="HIGH">HIGH</option>
                                                     <option value="MEDIUM">MEDIUM</option>
                                                     <option value="LOW">LOW</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label for="due_date">Due Date</label>
+                                                <input type="date" class="form-control" id="due_date"
+                                                    placeholder="NULL" name="project[due_date]">
+                                            </div>
+                                            <div class="mb-2">
+                                                <label for="project_type">Project Type</label>
+                                                <select name="project[project_type]" id="type" class="form-control">
+                                                    <option value="PROJECT">Project</option>
+                                                    <option value="ACTIVITY">Activity</option>
                                                 </select>
                                             </div>
                                             <div class="mb-2">

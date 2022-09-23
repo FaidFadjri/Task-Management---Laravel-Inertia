@@ -24,22 +24,32 @@
                                     </h4>
                                     <h6 class="card-subtitle">Ample admin Vs Pixel admin</h6>
                                 </div>
-                                <select
-                                    class="form-control {{ session()->get('user')['status'] == 'member' ? 'd-none' : '' }}"
-                                    style="width: fit-content; height: fit-content;" id="filter_member">
-                                    @if (session()->get('user')['status'] == 'admin')
-                                        @if ($user_id == null)
-                                            <option value="all" selected>Semua</option>
-                                        @else
-                                            <option value="all">Semua</option>
-                                        @endif
-                                        @foreach ($member as $user)
-                                            <option value="{{ $user->id }}"
-                                                {{ $user_id == $user->id ? 'selected' : '' }}>{{ $user->full_name }}
-                                            </option>
-                                        @endforeach
-                                    @endif
-                                </select>
+
+                                @if (session()->get('user')['status'] == 'admin')
+                                    <div class="d-flex gap-2">
+                                        <select
+                                            class="form-control {{ session()->get('user')['status'] == 'member' ? 'd-none' : '' }}"
+                                            style="width: fit-content; height: fit-content;" id="filter_member">
+                                            @if ($user_id == null)
+                                                <option value="all" selected>All People</option>
+                                            @else
+                                                <option value="all">Semua</option>
+                                            @endif
+                                            @foreach ($member as $user)
+                                                <option value="{{ $user->id }}"
+                                                    {{ $user_id == $user->id ? 'selected' : '' }}>{{ $user->full_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+
+                                        <select name="company" id="company" class="form-control"
+                                            style="width: fit-content; height: fit-content">
+                                            <option value="">All Company</option>
+                                            <option value="AKASTRA">Akastra</option>
+                                            <option value="KSC">KSC</option>
+                                        </select>
+                                    </div>
+                                @endif
                             </div>
                             <div id="chartdiv"></div>
                         </div>
@@ -60,9 +70,11 @@
                                     </div>
                                     <div class="ms-auto">
                                         <span class="badge bg-light text-muted">
-                                            @if ($item['task_complete'])
-                                                {{ round((intval($item['task_complete']) / intval($max_performance['task_complete'])) * 100, 2) }}
-                                                %
+                                            @if (session()->get('user')['status'] == 'admin')
+                                                @if ($item['task_complete'])
+                                                    {{ round((intval($item['task_complete']) / intval($max_performance['task_complete'])) * 100, 2) }}
+                                                    %
+                                                @endif
                                             @endif
                                         </span>
                                     </div>
@@ -153,19 +165,28 @@
                                             </div>
                                             <div class="d-flex justify-content-start gap-2 mt-2 ms-2"
                                                 style="align-items: center;">
-                                                @if ($item['progress'] == 'To Do')
-                                                    <p class="bg-info rounded-pill text-white m-0 px-3 fs-6">
-                                                        {{ $item['progress'] }}</p>
-                                                @elseif($item['progress'] == 'On Progress')
-                                                    <p class="bg-warning rounded-pill text-white m-0 px-3 fs-6">
-                                                        {{ $item['progress'] }}</p>
-                                                @elseif($item['progress'] == 'Complete')
-                                                    <p class="bg-success rounded-pill text-white m-0 px-3 fs-6">
-                                                        {{ $item['progress'] }}</p>
+                                                @if ($item['progress'] == 'TODO')
+                                                    @php
+                                                        $classes = 'bg-info';
+                                                    @endphp
+                                                @elseif($item['progress'] == 'WORKING ON IT')
+                                                    @php
+                                                        $classes = 'bg-warning';
+                                                    @endphp
+                                                @elseif($item['progress'] == 'COMPLETE')
+                                                    @php
+                                                        $classes = 'bg-success';
+                                                    @endphp
                                                 @else
-                                                    <p class="bg-danger rounded-pill text-white m-0 px-3 fs-6">
-                                                        {{ $item['progress'] }}</p>
+                                                    @php
+                                                        $classes = 'bg-danger';
+                                                    @endphp
                                                 @endif
+
+                                                <p
+                                                    class="m-0 {{ $classes }} px-3 fs-6 rounded-pill font-bold text-white">
+                                                    {{ $item['progress'] }}
+                                                </p>
                                                 <p class="m-0 font-medium text-secondary">Due date :
                                                     {{ $item['due_date'] }}
                                                 </p>
@@ -266,6 +287,15 @@
             });
 
             var sliceTemplate = series.slices.template;
+
+
+
+            series.slices.template.events.on("click", function(event) {
+                var category = event.target.dataItem.dataContext.category;
+                location.href = `/project?progress=${category}`
+            })
+
+
             sliceTemplate.setAll({
                 draggable: false,
                 templateField: "settings",
@@ -284,19 +314,19 @@
 
             series.data.setAll([{
                 value: data.todo,
-                category: 'to do'
+                category: 'TO DO'
             }, {
                 value: data.progress,
-                category: 'progress',
+                category: 'WORKING ON IT',
             }, {
                 value: data.complete,
-                category: 'complete'
+                category: 'COMPLETE'
             }, {
                 value: data.stuck,
-                category: 'stuck'
+                category: 'STUCK'
             }, {
                 value: data.pending,
-                category: 'pending'
+                category: 'PENDING'
             }])
 
             var legend = chart.children.push(am5.Legend.new(root, {
@@ -314,10 +344,25 @@
 
     <script>
         $(document).ready(function() {
+
+
+            var company = @json($company);
+            if (company) {
+                $("#company").val(company);
+            }
+
+
             $('#filter_member').change(function(e) {
                 e.preventDefault();
                 var member = $(this).val();
                 member === 'all' ? (location.href = '/') : (location.href = `/?user_id=${member}`)
+            });
+
+
+            $("#company").change(function(e) {
+                e.preventDefault();
+                var company = $(this).val();
+                company === '' ? (location.href = "/") : (location.href = `/?company=${company}`)
             });
         });
     </script>

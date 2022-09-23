@@ -9,6 +9,7 @@ class Files extends Model
     protected $table        = 'tb_file';
     protected $primaryKey   = 'id';
     protected $fillable     = ['file_name', 'file_type', 'id_project'];
+    public $timestamps      = false;
 
 
     function _getFilesByProject($project_id)

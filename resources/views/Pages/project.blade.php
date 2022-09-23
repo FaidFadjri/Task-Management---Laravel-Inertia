@@ -9,7 +9,7 @@
 
             @if (Session::has('pesan'))
                 <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <strong>Selamat!</strong> {{ Session::get('pesan') }}.
+                    {{ Session::get('pesan') }}.
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
@@ -108,7 +108,7 @@
                     <div class="col-12">
                         <div class="card mb-3 rounded-3">
                             <div class="card-header rounded-3 d-flex align-items-center justify-content-between">
-                                <p class="m-0 font-bold">{{ $item['division'] . ' at ' . $item['company'] }}</p>
+                                <p class="m-0 font-bold">{{ strtoupper($item['division']) . ' at ' . $item['company'] }}</p>
                                 <div class="d-flex gap-2">
                                     @if ($item['progress'] == 'WORKING ON IT')
                                         @php
@@ -153,7 +153,7 @@
                                 <div class="{{ $item['image'] ? 'col-md-8' : 'col-md-12' }}">
                                     <div class="card-body">
                                         <h5 class="card-title font-bold">{{ $item['project'] }}</h5>
-                                        <p class="card-text">{{ $item['description'] }}</p>
+                                        <p class="card-text">{{ substr($item['description'], 0, 200) . '...' }}</p>
                                         <p class="card-text"><small class="text-muted">
                                                 Last updated at {{ date('d F Y', strtotime($item['updated_at'])) }}</small>
                                         </p>

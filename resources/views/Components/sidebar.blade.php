@@ -14,8 +14,8 @@
                 </li>
                 @if (session()->get('user')['status'] == 'admin')
                     <li class="sidebar-item">
-                        <a class="sidebar-link waves-effect waves-dark sidebar-link" href="pages-profile.html"
-                            aria-expanded="false">
+                        <a class="sidebar-link waves-effect waves-dark sidebar-link"
+                            href="https://project.akastra.id/project/member" aria-expanded="false">
                             <i class="mdi mdi-account-network"></i>
                             <span class="hide-menu">User Management</span>
                         </a>
