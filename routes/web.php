@@ -20,6 +20,9 @@ use Inertia\Inertia;
 |
 */
 
+#--- Login Apis
+Route::get('loginWithApi/{username}/{password}', [AuthController::class, '_loginWithApi']);
+
 #--- Authentication Routes
 Route::get('login', [AuthController::class, 'login']);
 Route::post('login', [AuthController::class, '_storeLogin'])->name('login');

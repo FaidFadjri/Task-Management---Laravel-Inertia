@@ -165,7 +165,7 @@
                                             <div class="mb-2">
                                                 <label for="due_date">Due Date</label>
                                                 <input type="date" class="form-control" id="due_date"
-                                                    placeholder="NULL" name="project[due_date]">
+                                                    placeholder="NULL" name="">
                                             </div>
                                             <div class="mb-2">
                                                 <label for="project_type">Project Type</label>

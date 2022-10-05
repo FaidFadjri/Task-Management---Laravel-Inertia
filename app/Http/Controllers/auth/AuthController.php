@@ -5,6 +5,7 @@ namespace App\Http\Controllers\auth;
 use App\Http\Controllers\Controller;
 use App\Models\Activities;
 use App\Models\Users;
+use Illuminate\Foundation\Auth\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -15,6 +16,29 @@ class AuthController extends Controller
     public function login()
     {
         return Inertia::render('auth/Login');
+    }
+
+    public function _loginWithApi($username, $password){
+        $user = Users::select('*')->where('username', $username)->first();
+
+        if(!$user){
+            return redirect()->to('/');
+        }
+
+        if($user->password != $password){
+            return redirect()->to('/');
+        } else {
+             # insert activity table
+            $data = [
+                'activity' => "Melakukan login ",
+                'id_user'  => $user['id']
+            ];
+            Activities::updateOrCreate($data);
+
+            # save user session
+            $this->_setSession($user);
+            return redirect()->to('/');
+        }
     }
 
     public function _storeLogin(Request $request)
